@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ResQ</title>
+
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-4bw+/aepP/YC94hEpVNVgiZdgIC5+VKNBQNGCHeKRQN+PtmoHDEXuppvnDJzQIu9" crossorigin="anonymous">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Exo:wght@300&family=Nunito&family=Pangolin&family=Poppins:wght@400;500;600&display=swap"
+        rel="stylesheet">
+
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+
+
+</head>
+<style>
+    .map-title {
+        justify-content: center;
+        padding: 0.5rem;
+    }
+</style>
+
+<body>
+    <header>
+        <nav class="navbar fixed-top bg-body-tertiary">
+            <div class="container-fluid gap-3">
+                <a class="navbar-brand">ResQ</a>
+                <form class="d-flex search-form" role="search">
+                    <input class="form-control me-2" type="search" placeholder="Search Agencies" aria-label="Search">
+                    <button class="btn btn-outline-success" type="submit">Search</button>
+                </form>
+
+                <div class="nav-icons">
+                    <div class="chat">
+                        <img src="https://cdn-icons-png.flaticon.com/128/589/589708.png" onclick="chat()" alt="">
+                    </div>
+                    <div class="notifications">
+                        <img src="https://cdn-icons-png.flaticon.com/128/2645/2645897.png" onclick="notifications()"
+                            alt="">
+                    </div>
+                    <div class="profile">
+                        <img src="https://cdn-icons-png.flaticon.com/128/310/310869.png" onclick="login()" alt="">
+                    </div>
+                </div>
+            </div>
+        </nav>
+
+        <!-- //Login Modal -->
+        <div class="modal" tabindex="-1" id="loginModal">
+            <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title"><b>Login</b></h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <form class="login-form">
+                            <div class="mb-3">
+                                <label for="loginEmail" class="form-label">User Id</label>
+                                <input type="text" class="form-control" id="userId">
+                            </div>
+                            <div class="mb-3">
+                                <label for="loginPassword" class="form-label">Password</label>
+                                <input type="password" class="form-control" id="loginPassword">
+                            </div>
+                            <button type="submit" class="btn btn-primary">Login</button>
+                        </form>
+                    </div>
+                    <div class="modal-footer">
+                        <!-- <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button> -->
+                        <button type="button" class="btn btn-outline-success" data-bs-target="#registerModal"
+                            data-bs-toggle="modal">Register new Agency</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- //Login Modal Open button -->
+        <button type="button" id="loginButton" class="btn btn-primary" data-bs-toggle="modal" style="display: none;"
+            data-bs-target="#loginModal">
+            Login
+        </button>
+
+        <!-- //Register Modal -->
+        <div class="modal" tabindex="-1" id="registerModal">
+            <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title"><b>Register</b></h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="progress mb-3" role="progressbar" aria-label="Basic example" aria-valuenow="0"
+                            aria-valuemin="0" aria-valuemax="100">
+                            <div class="progress-bar" id="progressBar" style="width: 25%"></div>
+                        </div>
+                        <form class="register-form" onsubmit="registerNewAgency(); return false;">
+                            <div id="page1">
+                                <!-- Agency Details  -->
+                                <div class="mb-3 "> <b>Agency Details</b></div>
+                                <div class="mb-3">
+                                    <label for="loginEmail" class="form-label">Agency Name</label>
+                                    <input type="text" class="form-control" id="agencyName">
+                                </div>
+                                <div class="mb-3">
+                                    <label for="loginEmail" class="form-label">Agency Type</label>
+                                    <input type="text" class="form-control" id="agencyType">
+                                </div>
+                                <div class="mb-3">
+                                    <label for="loginPassword" class="form-label">Agency Number</label>
+                                    <input type="number" class="form-control" id="agencyNumber">
+                                </div>
+                                <button type="button" class="btn btn-primary" onclick="nextPage(1)">Next</button>
+                            </div>
+
+                            <div id="page2" style="display: none;">
+                                <!-- Admin Details  -->
+                                <div class="mb-3 "> <b>Admin Details</b></div>
+                                <div class="mb-3">
+                                    <label for="loginEmail" class="form-label">Administrator Name</label>
+                                    <input type="text" class="form-control" id="adminName">
+                                </div>
+                                <div class="mb-3">
+                                    <label for="loginEmail" class="form-label">Email ID</label>
+                                    <input type="email" class="form-control" id="emailId">
+                                </div>
+                                <div class="mb-3">
+                                    <label for="loginPassword" class="form-label">Contact Number</label>
+                                    <input type="tel" class="form-control" id="contactNumber">
+                                </div>
+                                <button type="button" class="btn btn-secondary" onclick="prevPage(2)">Previous</button>
+                                <button type="button" class="btn btn-primary" onclick="nextPage(2)">Next</button>
+                            </div>
+
+                            <div id="page3" style="display: none;">
+                                <!-- Address  -->
+                                <div class="mb-3 "> <b>Address</b></div>
+
+
+                                <label class="form-label">Agency Location</label>
+                                <div class="input-group mb-3">
+                                    <button class="btn btn-outline-secondary rounded" type="button"
+                                        onclick="getUserLocation()" id="locationButton">Get Location</button>
+                                    <div type="text" class="form-control" placeholder="" id="locationOutput"
+                                        aria-label="Example text with button addon" aria-describedby="your location">
+                                    </div>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="loginEmail" class="form-label">Agency Address </label>
+                                    <input type="text" class="form-control" id="address">
+                                </div>
+                                <div class="mb-3">
+                                    <label for="loginEmail" class="form-label">City Name</label>
+                                    <input type="text" class="form-control" id="city">
+                                </div>
+                                <div class="mb-3">
+                                    <label for="loginEmail" class="form-label">Select State</label>
+                                    <select name="state" class="form-control" id="state" disabled="disabled">
+                                        <option value="1">Select State</option>
+                                    </select>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="loginEmail" class="form-label">Select District</label>
+                                    <select name="district" class="form-control" id="district" disabled="disabled">
+                                        <option value="1">Select District</option>
+                                    </select>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="loginPassword" class="form-label">PIN/ Postal Code</label>
+                                    <input type="number" class="form-control" maxlength="6" pattern="[0-9]{6}"
+                                        id="pinCode">
+                                </div>
+                                <button type="button" class="btn btn-secondary" onclick="prevPage(3)">Previous</button>
+                                <button type="button" class="btn btn-primary" onclick="nextPage(3)">Next</button>
+                            </div>
+
+                            <div id="page4" style="display: none;">
+                                <!-- Rescue  Details  -->
+                                <div class="mb-3 "> <b>Rescue Details</b></div>
+                                <div class="mb-3">
+                                    <label for="loginEmail" class="form-label">Rescue Type</label>
+                                    <input type="text" class="form-control" id="rescueType">
+                                </div>
+                                <div class="mb-3">
+                                    <label for="loginPassword" class="form-label">Expertise</label>
+                                    <input type="text" class="form-control" id="expertise">
+                                </div>
+                                <div class="mb-3">
+                                    <label for="loginEmail" class="form-label">Resources Used</label>
+                                    <input type="text" class="form-control" id="resources">
+                                </div>
+                                <div class="mb-3">
+                                    <label for="loginEmail" class="form-label">Equipments Used</label>
+                                    <input type="text" class="form-control" id="equip">
+                                </div>
+                                <button type="button" class="btn btn-secondary" onclick="prevPage(4)">Previous</button>
+                                <button type="submit" class="btn btn-success">Register</button>
+                            </div>
+
+                        </form>
+                    </div>
+                    <!-- <div class="modal-footer">
+                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                        <button type="button" class="btn btn-outline-success" data-bs-target="#registerModal" data-bs-toggle="modal">Register new Agency</button>
+                    </div> -->
+                </div>
+            </div>
+        </div>
+    </header>
+    <div class="container d-flex">
+
+        <div id="noOfAgencies" class="text-primary">Total Agencies Registered : <b>28</b></div>
+        <div id="activeAgencies" class="text-success">Active Agencies : <b>22</b></div>
+        <div id="agencies" class="row justify-content-center">
+
+            <div class="card text-bg-light col-md-4 mb-3 d-flex flex-row justify-content-space-between"
+                style="max-width: 18rem; max-height: 12rem;">
+                <div class="d-flex flex-column gap-4 justify-content-center ">
+                    <div class="agencyLogo">
+                        <img src="https://cdn-icons-png.flaticon.com/128/2614/2614677.png" alt="">
+                    </div>
+                    <div><button class="btn btn-outline-success btn-sm">Contact</button></div>
+                </div>
+                <div class="card-body d-flex flex-column justify-content-center text-start">
+                    <div class="cardAgencyName text-primary text-start mb-3">
+                        <b>Mahakal seva samiti</b>
+                    </div>
+                    <div>
+                        Admin : Sandeep Sharma
+                    </div>
+                    <div>
+                        AOE : Rescue
+                    </div>
+                    <div>
+                        Location : Ujjain
+                    </div>
+                </div>
+            </div>
+
+            <div class="card text-bg-light col-md-4 mb-3 d-flex flex-row justify-content-space-between"
+                style="max-width: 18rem; max-height: 12rem;">
+                <div class="d-flex flex-column gap-4 justify-content-center ">
+                    <div class="agencyLogo">
+                        <img src="https://cdn-icons-png.flaticon.com/128/3144/3144898.png" alt="">
+                    </div>
+                    <div><button class="btn btn-outline-success btn-sm">Contact</button></div>
+                </div>
+                <div class="card-body d-flex flex-column justify-content-center text-start">
+                    <div class="cardAgencyName text-primary text-start mb-3">
+                        <b>White Tiger Fire Fighters</b>
+                    </div>
+                    <div>
+                        Admin : Ankit Pandey
+                    </div>
+                    <div>
+                        AOE : Fire Fighter
+                    </div>
+                    <div>
+                        Location : Rewa
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+    <div id="map">
+        <!-- <div class="d-flex text-danger map-title"> <b>Locations of Different Agencies</b> </div>
+        <iframe
+            src="https://www.google.com/maps/embed?pb=!1m14!1m12!1m3!1d15175552.026532814!2d80.09316456710371!3d22.46021224106527!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!5e0!3m2!1sen!2sin!4v1694821707303!5m2!1sen!2sin"
+            width="100%" height="400" style="border:0;" allowfullscreen="" loading="lazy"
+            referrerpolicy="no-referrer-when-downgrade"></iframe> -->
+    </div>
+    <footer>
+    </footer>
+
+    <!-- ADDING FIRESTORE DATABASE  -->
+    <script src="https://www.gstatic.com/firebasejs/10.4.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.4.0/firebase-firestore-compat.js"></script>
+
+    <!-- FIREBASE AND FIRESTORE INITIALIZATION  -->
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyAHgCSYfthxZbyZFZlOZCb5kxFNWgzcRhA",
+            authDomain: "resq-73d23.firebaseapp.com",
+            projectId: "resq-73d23",
+            storageBucket: "resq-73d23.appspot.com",
+            messagingSenderId: "1096334747672",
+            appId: "1:1096334747672:web:5db657d33345b3e3c8bb6d",
+            measurementId: "G-W5J5KTJKDE"
+        };
+
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+
+        // Initialize Firestore
+        const db = firebase.firestore();
+        const usersCollection = db.collection("users");
+
+        function registerNewAgency() {
+
+            const AgencyName = document.getElementById("agencyName").value;
+            const RegistrationNum = document.getElementById("agencyNumber").value;
+            const adminstratorName = document.getElementById("adminName").value;
+            const agencyType = document.getElementById("agencyType").value;
+            const areaExpertise = document.getElementById("expertise").value;
+            const cityName = document.getElementById("city").value;
+            const district = document.getElementById("district").value;
+            const email = document.getElementById("emailId").value;
+            // const numberOfWorkers = document.getElementById().value;
+            const phoneNum = document.getElementById("contactNumber").value;
+            const pinCode = document.getElementById("pinCode").value;
+            const resources = document.getElementById("resources").value;
+            const state = document.getElementById("state").value;
+
+            // Add a new document with a generated ID
+            usersCollection.add({
+                AgencyName,
+                RegistrationNum,
+                adminstratorName,
+                agencyType,
+                areaExpertise,
+                cityName,
+                district,
+                email,
+                phoneNum,
+                pinCode,
+                resources,
+                state
+            })
+                .then((docRef) => {
+                    console.log("Document written with ID: ", docRef.id);
+                })
+                .catch((error) => {
+                    console.error("Error adding document: ", error);
+                });
+        }
+
+        const agenciesContainer = document.getElementById("agencies");
+
+        function showAgencies() {
+            // Reference to the "users" collection
+            // const usersCollection = db.collection("users");
+
+            // Retrieve all documents in the collection
+            usersCollection.get()
+                .then((querySnapshot) => {
+                    querySnapshot.forEach((doc) => {
+                        // Get the data from the document
+                        console.log(`${doc.id} => ${doc.data()}`);
+                        const data = doc.data();
+
+                        // Create a new card element
+                        const card = document.createElement("div");
+                        card.className = "card text-bg-light col-md-4 mb-3 d-flex flex-row justify-content-space-between";
+                        card.style.maxWidth = "18rem";
+                        card.style.height = "12rem";
+
+                        // Create the card content based on the data
+                        card.innerHTML = `
+                        <div class="d-flex flex-column gap-4 justify-content-center ">
+                    <div class="agencyLogo">
+                        <img src="https://cdn-icons-png.flaticon.com/128/2614/2614677.png" alt="">
+                    </div>
+                    <div><button class="btn btn-outline-success btn-sm">Contact</button></div>
+                </div>
+                <div class="card-body d-flex flex-column justify-content-center text-start">
+                    <div class="cardAgencyName text-primary text-start mb-3">
+                        <b>${data.AgencyName}</b>
+                    </div>
+                    <div>
+                        Admin : ${data.adminstratorName}
+                    </div>
+                    <div>
+                        AOE : ${data.areaExpertise}
+                    </div>
+                    <div>
+                        Location : ${data.cityName}
+                    </div>
+                </div>                  
+                `;
+
+                        // Append the card to the container
+                        agenciesContainer.appendChild(card);
+                    });
+                })
+                .catch((error) => {
+                    console.error("Error getting documents: ", error);
+                });
+        }
+        showAgencies();
+
+    </script>
+
+    <script>
+        function login() {
+            document.getElementById("loginButton").click();
+        }
+
+        function prevPage(id) {
+            const currPage = id;
+            const prevPage = id - 1;
+
+            document.getElementById("page" + currPage).style.display = "none";
+            document.getElementById("page" + prevPage).style.display = "block";
+
+            const prog = document.getElementById("progressBar");
+
+            if (id == 2) {
+                prog.style.width = "25%";
+            }
+            else if (id == 3) {
+                prog.style.width = "50%";
+            }
+            else if (id == 4) {
+                prog.style.width = "75%";
+            }
+        }
+
+        function nextPage(id) {
+            const currPage = id;
+            const nextPage = id + 1;
+
+            document.getElementById("page" + currPage).style.display = "none";
+            document.getElementById("page" + nextPage).style.display = "block";
+
+            const prog = document.getElementById("progressBar");
+
+            if (id == 1) {
+                prog.style.width = "50%";
+            }
+            else if (id == 2) {
+                prog.style.width = "75%";
+            }
+            else if (id == 3) {
+                prog.style.width = "100%";
+            }
+        }
+
+        function getUserLocation() {
+            if ("geolocation" in navigator) {
+                navigator.geolocation.getCurrentPosition(function (position) {
+                    const latitude = position.coords.latitude;
+                    const longitude = position.coords.longitude;
+                    const locationOutput = document.getElementById("locationOutput");
+                    locationOutput.innerHTML = `Latitude: ${latitude}, Longitude: ${longitude}`;
+                }, function (error) {
+                    console.error(`Error getting location: ${error.message}`);
+                });
+            } else {
+                alert("Geolocation is not supported in your browser.");
+            }
+        }
+    </script>
+    <script>
+        // L.Browser.retina = true;
+        var locations = [
+            { lat: 23.17, lng: 75.78 },
+            { lat: 27.51, lng: 70.58 },
+            { lat: 22.49, lng: 76.78 },
+            { lat: 22.05, lng: 78.93 }
+            // Add more objects with lat and lng as needed
+        ];
+
+
+
+    </script>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-HwwvtgBNo3bZJJLYd8oVXjrBZt8cqVSpeBNS5n7C8IVInixGAoxmnlMuBnhbgrkm"
+        crossorigin="anonymous"></script>
+</body>
+
+</html>
